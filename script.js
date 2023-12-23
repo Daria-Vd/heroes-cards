@@ -1,18 +1,53 @@
 let heroes = [
-    ["Axe", "Tank"],
-    ["Crystal Maiden", "Support"],
-    ["Crystal", "Supp"]
+    {
+        name: "Axe",
+        classHero: "Tank",
+        url: "https://api.dicebear.com/7.x/avataaars/svg?seed=2vwb0h"
+    },
+    {
+        name: "Crystal Maiden",
+        classHero: "Support",
+        url: "https://api.dicebear.com/7.x/avataaars/svg?seed=2cncp"
+    },
+    {
+        name: "Capitan America",
+        classHero: "Avengers",
+        url: "https://api.dicebear.com/7.x/avataaars/svg?seed=dl3my"
+    }
 ];
 
+//
+
+function generateId() {
+    const characters = "abcdefghijklmnopqrstuvwxyz",
+        numbers = "0123456789";
+    let id = "";
+
+    for (let i = 0; i < 24; i++) {
+        if (i % 2 === 0) {
+            id += numbers.charAt(Math.floor(Math.random() * numbers.length));
+        } else {
+            id += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            );
+        }
+    }
+
+    return `${id}`;
+}
+
 const handleDelete = (cardButton) => {
-    const hero = cardButton.dataset.hero;
-    const classes = cardButton.dataset.classes;
-    const cardId = hero.split(' ').join("") + classes;
-    heroes = heroes.filter(card => {
-        return cardId !== card[0].split(' ').join("") + card[1];
+    const cardId = cardButton.dataset.id;
+    heroes = heroes.filter((card) => cardId !== card._id);
+    displayHeroes();
+};
+
+const handleChangeAvatar = (cardButton) => {
+    const cardId = cardButton.dataset.id;
+    heroes = heroes.map((card) => {
+        return cardId === card._id ? {...card, url: ""} : card;
     });
     displayHeroes();
-
 }
 
 const heroesContainer = document.getElementById("heroesContainer");
@@ -21,28 +56,42 @@ function displayHeroes() {
     // Очищаем текущее содержимое
     heroesContainer.innerHTML = "";
 
-
     for (let i = 0; i < heroes.length; i += 3) {
         const heroesSlice = heroes.slice(i, i + 3);
-        const row = document.createElement("div")
+        const row = document.createElement("div");
         row.classList.add("row");
         heroesContainer.appendChild(row);
-        // С помощью цикла for of проходимся по массиву массивов героев
-        // с помощью метода деструктуризации массивов получаем переменные hero и classes
-        for (const [hero, classes] of heroesSlice) {
-            // Создаём элемент, в который будем добавлять информацию о герое
-            let heroDiv = document.createElement("div");
-            // добавляем класс для возможности стилизации эдемента
-            heroDiv.classList.add("card");
 
-            // Записываем в созданный элемент разметку, подставляя необходимые данные
-            heroDiv.innerHTML = `<h3>${hero}</h3><p>${classes}</p><button data-hero="${hero}" data-classes="${classes}" onclick="handleDelete(this)">Delete</button>`;
+        for (let card of heroesSlice) {
+            let heroDiv = document.createElement("div");
+            heroDiv.classList.add("card");
+            card.url = card.url
+                ? card.url
+                : `https://api.dicebear.com/7.x/avataaars/svg?seed=${(
+                    Math.random() + 1
+                )
+                    .toString(36)
+                    .substring(7)}`;
+            card._id = card._id ? card._id : generateId();
+            heroDiv.innerHTML = `
+<img
+    src='${card.url}'
+    class="rounded-circle shadow-1-strong me-3"
+    alt="avatar"
+    width="65"
+    height="65"
+/>
+<h3>${card.name}</h3>
+<p>${card.classHero}</p>
+<div class="buttons">
+<button data-id="${card._id}"  onclick="handleDelete(this)">Delete</button>
+<button data-id="${card._id}" onclick="handleChangeAvatar(this)">Change Avatar</button>
+</div>`;
 
             // Добавляем карточку героя в контейнер
             row.appendChild(heroDiv);
         }
     }
-
 }
 
 // если в начале работы приложения массив heroes имеет данные, то выводим их на экран
@@ -55,13 +104,9 @@ function addHero() {
     const newHeroName = nameInput.value;
     const newHeroClass = classInput.value;
 
-    /* Кидаем новые данные из инпутов в массивы с именами и классами */
-
-    heroes = [...heroes, [newHeroName, newHeroClass]];
-    /*
-        Используем функцию, которую мы подготовили в прошлом уроке,
-        чтобы обновить список героев на странице
-    */
+    newHeroName &&
+    newHeroClass &&
+    (heroes = [...heroes, {name: newHeroName, classHero: newHeroClass}]);
 
     // Вызываем написанную функцию
     displayHeroes();
