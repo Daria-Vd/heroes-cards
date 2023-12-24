@@ -26,15 +26,17 @@ function generateId() {
     for (let i = 0; i < 24; i++) {
         if (i % 2 === 0) {
             id += numbers.charAt(Math.floor(Math.random() * numbers.length));
-        } else {
+            } else {
             id += characters.charAt(
                 Math.floor(Math.random() * characters.length)
             );
         }
+        console.log(id);
     }
 
     return `${id}`;
 }
+
 
 const handleDelete = (cardButton) => {
     const cardId = cardButton.dataset.id;
